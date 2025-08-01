@@ -1,10 +1,12 @@
 package com.tetris.game;
 
-import com.tetris.model.Tetromino;
-import com.tetris.util.GameConstants;
-import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.util.Random;
+
+import javax.swing.Timer;
+
+import com.tetris.model.Tetromino;
+import com.tetris.util.GameConstants;
 
 /**
  * ゲームロジックの中心クラス
@@ -152,7 +154,6 @@ public class Game {
 
         if (!board.canPlace(currentTetromino)) {
             // 移動できない場合は元に戻して固定
-            currentTetromino.moveDown(); // 一旦元に戻す
             currentTetromino.setY(currentTetromino.getY() - 1);
             placeCurrentTetromino();
         }
