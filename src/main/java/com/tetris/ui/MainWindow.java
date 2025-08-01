@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -18,6 +20,7 @@ import javax.swing.Timer;
 
 import com.tetris.game.Game;
 import com.tetris.game.GameController;
+import com.tetris.model.Tetromino;
 import com.tetris.util.GameConstants;
 
 /**
@@ -122,7 +125,7 @@ public class MainWindow extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                // TODO: 次のピースを描画
+                drawNextPiece(g);
             }
         };
         nextPiecePanel.setBackground(Color.BLACK);
@@ -205,6 +208,69 @@ public class MainWindow extends JFrame {
             case GAME_OVER:
                 statusLabel.setText("GAME OVER");
                 break;
+        }
+    }
+
+    /**
+     * 次のピースを描画する
+     * 
+     * @param g グラフィックスコンテキスト
+     */
+    private void drawNextPiece(Graphics g) {
+        if (game.getNextTetromino() == null) {
+            return;
+        }
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        Tetromino nextPiece = game.getNextTetromino();
+        int[][] shape = nextPiece.getShape();
+        int colorIndex = nextPiece.getColorIndex();
+        int blockSize = 15; // 小さめのブロックサイズ
+
+        // テトリミノの実際のサイズを計算
+        int minX = 4, maxX = -1, minY = 4, maxY = -1;
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                if (shape[y][x] != 0) {
+                    minX = Math.min(minX, x);
+                    maxX = Math.max(maxX, x);
+                    minY = Math.min(minY, y);
+                    maxY = Math.max(maxY, y);
+                }
+            }
+        }
+
+        int pieceWidth = (maxX - minX + 1) * blockSize;
+        int pieceHeight = (maxY - minY + 1) * blockSize;
+        int offsetX = (nextPiecePanel.getWidth() - pieceWidth) / 2;
+        int offsetY = (nextPiecePanel.getHeight() - pieceHeight) / 2;
+
+        // テトリミノを描画
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                if (shape[y][x] != 0) {
+                    int pixelX = offsetX + (x - minX) * blockSize;
+                    int pixelY = offsetY + (y - minY) * blockSize;
+
+                    // ブロックを描画
+                    Color baseColor = GameConstants.TETROMINO_COLORS[colorIndex];
+                    g2d.setColor(baseColor);
+                    g2d.fillRect(pixelX, pixelY, blockSize, blockSize);
+
+                    // 枠線
+                    g2d.setColor(baseColor.brighter());
+                    g2d.drawLine(pixelX, pixelY, pixelX + blockSize - 1, pixelY);
+                    g2d.drawLine(pixelX, pixelY, pixelX, pixelY + blockSize - 1);
+
+                    g2d.setColor(baseColor.darker());
+                    g2d.drawLine(pixelX + blockSize - 1, pixelY,
+                            pixelX + blockSize - 1, pixelY + blockSize - 1);
+                    g2d.drawLine(pixelX, pixelY + blockSize - 1,
+                            pixelX + blockSize - 1, pixelY + blockSize - 1);
+                }
+            }
         }
     }
 }

@@ -57,6 +57,11 @@ public class GamePanel extends JPanel {
         // アンチエイリアシングを有効化
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        // アニメーションマネージャーを更新
+        if (game.getAnimationManager() != null) {
+            game.getAnimationManager().update(System.currentTimeMillis());
+        }
+
         // グリッド線を描画
         drawGrid(g2d);
 
@@ -71,6 +76,14 @@ public class GamePanel extends JPanel {
         // 落下中のテトリミノを描画
         if (game.getCurrentTetromino() != null) {
             drawTetromino(g2d, game.getCurrentTetromino(), 1.0f);
+        }
+
+        // アニメーション効果を描画
+        if (game.getAnimationManager() != null) {
+            game.getAnimationManager().render(g2d,
+                    GameConstants.BOARD_WIDTH * GameConstants.BLOCK_SIZE,
+                    GameConstants.BOARD_HEIGHT * GameConstants.BLOCK_SIZE,
+                    GameConstants.BLOCK_SIZE);
         }
 
         // ゲームオーバー時のオーバーレイ

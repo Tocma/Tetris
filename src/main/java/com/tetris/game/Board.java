@@ -1,18 +1,20 @@
 package com.tetris.game;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.tetris.model.Tetromino;
 import com.tetris.util.GameConstants;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * ゲームボード（盤面）を管理するクラス
  * 固定されたブロックの管理、衝突判定、ライン消去などを行う
  */
 public class Board {
-    
-    private int[][] grid;  // ボードのグリッド（0:空、1-7:各テトリミノの色）
-    
+
+    private int[][] grid; // ボードのグリッド（0:空、1-7:各テトリミノの色）
+
     /**
      * ボードのコンストラクタ
      * グリッドを初期化する
@@ -20,7 +22,7 @@ public class Board {
     public Board() {
         initializeBoard();
     }
-    
+
     /**
      * ボードを初期化する
      */
@@ -28,7 +30,7 @@ public class Board {
         grid = new int[GameConstants.BOARD_HEIGHT][GameConstants.BOARD_WIDTH];
         clearBoard();
     }
-    
+
     /**
      * ボードをクリアする
      */
@@ -39,9 +41,10 @@ public class Board {
             }
         }
     }
-    
+
     /**
      * 指定位置のセルの値を取得
+     * 
      * @param x X座標
      * @param y Y座標
      * @return セルの値（0:空、1-7:色インデックス）
@@ -50,13 +53,14 @@ public class Board {
         if (isValidPosition(x, y)) {
             return grid[y][x];
         }
-        return -1;  // 無効な位置
+        return -1; // 無効な位置
     }
-    
+
     /**
      * 指定位置にブロックを設置
-     * @param x X座標
-     * @param y Y座標
+     * 
+     * @param x     X座標
+     * @param y     Y座標
      * @param value 設置する値（色インデックス）
      */
     public void setCell(int x, int y, int value) {
@@ -64,15 +68,16 @@ public class Board {
             grid[y][x] = value;
         }
     }
-    
+
     /**
      * テトリミノをボードに固定する
+     * 
      * @param tetromino 固定するテトリミノ
      */
     public void placeTetromino(Tetromino tetromino) {
         int[][] shape = tetromino.getShape();
         int colorIndex = tetromino.getColorIndex();
-        
+
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 4; col++) {
                 if (shape[row][col] != 0) {
@@ -83,9 +88,10 @@ public class Board {
             }
         }
     }
-    
+
     /**
      * テトリミノが配置可能かチェック
+     * 
      * @param tetromino チェックするテトリミノ
      * @return 配置可能な場合true
      */
@@ -93,18 +99,18 @@ public class Board {
         int[][] shape = tetromino.getShape();
         int tetrominoX = tetromino.getX();
         int tetrominoY = tetromino.getY();
-        
+
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 4; col++) {
                 if (shape[row][col] != 0) {
                     int boardX = tetrominoX + col;
                     int boardY = tetrominoY + row;
-                    
+
                     // ボード範囲外チェック
                     if (!isValidPosition(boardX, boardY)) {
                         return false;
                     }
-                    
+
                     // 既存ブロックとの衝突チェック
                     if (grid[boardY][boardX] != 0) {
                         return false;
@@ -114,31 +120,54 @@ public class Board {
         }
         return true;
     }
-    
+
     /**
-     * 完成したラインを検出して消去する
-     * @return 消去したライン数
+     * 完成したラインを検出する（削除せずに検出のみ）
+     * 
+     * @return 完成したライン番号のリスト
      */
-    public int clearCompleteLines() {
+    public List<Integer> getClearedLines() {
         List<Integer> completeLines = new ArrayList<>();
-        
-        // 完成したラインを検出
+
         for (int y = 0; y < GameConstants.BOARD_HEIGHT; y++) {
             if (isLineFull(y)) {
                 completeLines.add(y);
             }
         }
-        
-        // ラインを消去
-        for (int lineIndex : completeLines) {
+
+        return completeLines;
+    }
+
+    /**
+     * 指定されたラインを消去する
+     * 
+     * @param lines 消去するライン番号のリスト
+     * @return 消去したライン数
+     */
+    public int clearLines(List<Integer> lines) {
+        // ラインを降順にソートして上から消去
+        lines.sort(Collections.reverseOrder());
+
+        for (int lineIndex : lines) {
             removeLine(lineIndex);
         }
-        
-        return completeLines.size();
+
+        return lines.size();
     }
-    
+
+    /**
+     * 完成したラインを検出して消去する（後方互換性のため残す）
+     * 
+     * @return 消去したライン数
+     */
+    public int clearCompleteLines() {
+        List<Integer> completeLines = getClearedLines();
+        return clearLines(completeLines);
+    }
+
     /**
      * 指定行が埋まっているかチェック
+     * 
      * @param y チェックする行
      * @return 埋まっている場合true
      */
@@ -150,9 +179,10 @@ public class Board {
         }
         return true;
     }
-    
+
     /**
      * 指定行を削除し、上の行を下にずらす
+     * 
      * @param lineToRemove 削除する行
      */
     private void removeLine(int lineToRemove) {
@@ -162,26 +192,28 @@ public class Board {
                 grid[y][x] = grid[y - 1][x];
             }
         }
-        
+
         // 最上段をクリア
         for (int x = 0; x < GameConstants.BOARD_WIDTH; x++) {
             grid[0][x] = 0;
         }
     }
-    
+
     /**
      * 指定座標がボード内の有効な位置かチェック
+     * 
      * @param x X座標
      * @param y Y座標
      * @return 有効な位置の場合true
      */
     private boolean isValidPosition(int x, int y) {
-        return x >= 0 && x < GameConstants.BOARD_WIDTH && 
-               y >= 0 && y < GameConstants.BOARD_HEIGHT;
+        return x >= 0 && x < GameConstants.BOARD_WIDTH &&
+                y >= 0 && y < GameConstants.BOARD_HEIGHT;
     }
-    
+
     /**
      * ゲームオーバー状態かチェック（最上段にブロックがあるか）
+     * 
      * @return ゲームオーバーの場合true
      */
     public boolean isGameOver() {
@@ -193,9 +225,10 @@ public class Board {
         }
         return false;
     }
-    
+
     /**
      * ボードのグリッドを取得（読み取り専用）
+     * 
      * @return グリッドのコピー
      */
     public int[][] getGrid() {

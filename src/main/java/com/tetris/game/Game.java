@@ -1,11 +1,13 @@
 package com.tetris.game;
 
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.Random;
 
 import javax.swing.Timer;
 
 import com.tetris.effects.AnimationManager;
+import com.tetris.effects.SoundManager;
 import com.tetris.model.Tetromino;
 import com.tetris.util.GameConstants;
 
@@ -32,6 +34,7 @@ public class Game {
     private Timer gameTimer; // ゲームタイマー
     private Random random; // 乱数生成器
     private AnimationManager animationManager; // アニメーション管理
+    private SoundManager soundManager; // サウンド管理
 
     private int score; // スコア
     private int level; // レベル
@@ -53,6 +56,7 @@ public class Game {
         random = new Random();
         gameState = GameState.READY;
         animationManager = new AnimationManager();
+        soundManager = new SoundManager();
 
         // タイマーの初期化
         gameTimer = new Timer(GameConstants.INITIAL_DELAY, this::gameUpdate);
@@ -108,6 +112,7 @@ public class Game {
     public void stopGame() {
         gameTimer.stop();
         gameState = GameState.GAME_OVER;
+        soundManager.playSound(SoundManager.SoundType.GAME_OVER);
     }
 
     /**
@@ -173,6 +178,8 @@ public class Game {
         currentTetromino.moveLeft();
         if (!board.canPlace(currentTetromino)) {
             currentTetromino.moveRight(); // 元に戻す
+        } else {
+            soundManager.playSound(SoundManager.SoundType.MOVE);
         }
     }
 
@@ -187,6 +194,8 @@ public class Game {
         currentTetromino.moveRight();
         if (!board.canPlace(currentTetromino)) {
             currentTetromino.moveLeft(); // 元に戻す
+        } else {
+            soundManager.playSound(SoundManager.SoundType.MOVE);
         }
     }
 
@@ -201,6 +210,8 @@ public class Game {
         currentTetromino.rotateClockwise();
         if (!board.canPlace(currentTetromino)) {
             currentTetromino.rotateCounterClockwise(); // 元に戻す
+        } else {
+            soundManager.playSound(SoundManager.SoundType.ROTATE);
         }
     }
 
@@ -227,12 +238,45 @@ public class Game {
      * 現在のテトリミノをボードに固定
      */
     private void placeCurrentTetromino() {
+        // ブロック固定音を再生
+        soundManager.playSound(SoundManager.SoundType.BLOCK_PLACE);
+
+        // パーティクルエフェクトを追加
+        int[][] shape = currentTetromino.getShape();
+        for (int row = 0; row < 4; row++) {
+            for (int col = 0; col < 4; col++) {
+                if (shape[row][col] != 0) {
+                    int blockX = currentTetromino.getX() + col;
+                    int blockY = currentTetromino.getY() + row;
+                    if (blockX >= 0 && blockX < GameConstants.BOARD_WIDTH &&
+                            blockY >= 0 && blockY < GameConstants.BOARD_HEIGHT) {
+                        animationManager.addBlockPlaceEffect(
+                                blockX, blockY,
+                                GameConstants.BLOCK_SIZE,
+                                GameConstants.TETROMINO_COLORS[currentTetromino.getColorIndex()]);
+                    }
+                }
+            }
+        }
+
         board.placeTetromino(currentTetromino);
 
         // ライン消去処理
-        int clearedLines = board.clearCompleteLines();
-        if (clearedLines > 0) {
-            updateScore(clearedLines);
+        List<Integer> clearedLines = board.getClearedLines();
+        if (!clearedLines.isEmpty()) {
+            // アニメーションを開始
+            animationManager.startLineAnimation(clearedLines);
+
+            // ライン消去音を再生
+            if (clearedLines.size() == 4) {
+                soundManager.playSound(SoundManager.SoundType.TETRIS);
+            } else {
+                soundManager.playSound(SoundManager.SoundType.LINE_CLEAR);
+            }
+
+            // 実際にラインを消去
+            int clearedCount = board.clearLines(clearedLines);
+            updateScore(clearedCount);
             updateLevel();
         }
 
@@ -264,6 +308,9 @@ public class Game {
         if (newLevel != level) {
             level = newLevel;
             updateGameSpeed();
+            // レベルアップアニメーションと音を再生
+            animationManager.startLevelUpAnimation(level);
+            soundManager.playSound(SoundManager.SoundType.LEVEL_UP);
         }
     }
 
@@ -304,5 +351,13 @@ public class Game {
 
     public int getLines() {
         return lines;
+    }
+
+    public AnimationManager getAnimationManager() {
+        return animationManager;
+    }
+
+    public SoundManager getSoundManager() {
+        return soundManager;
     }
 }
