@@ -1,4 +1,4 @@
-package main.java.com.tetris.util;
+package com.tetris.util;
 
 import java.awt.Color;
 

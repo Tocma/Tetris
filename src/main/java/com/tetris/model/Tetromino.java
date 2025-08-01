@@ -1,4 +1,4 @@
-package main.java.com.tetris.model;
+package com.tetris.model;
 
 /**
  * テトリミノ（ブロック）を表すクラス

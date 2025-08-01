@@ -1,7 +1,7 @@
-package main.java.com.tetris.game;
+package com.tetris.game;
 
-import main.java.com.tetris.model.Tetromino;
-import main.java.com.tetris.util.GameConstants;
+import com.tetris.model.Tetromino;
+import com.tetris.util.GameConstants;
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.util.Random;

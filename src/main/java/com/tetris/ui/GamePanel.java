@@ -1,6 +1,6 @@
-package main.java.com.tetris.ui;
+package com.tetris.ui;
 
-import main.java.com.tetris.util.GameConstants;
+import com.tetris.util.GameConstants;
 import javax.swing.JPanel;
 import java.awt.Dimension;
 import java.awt.Graphics;

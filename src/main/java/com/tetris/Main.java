@@ -1,6 +1,6 @@
-package main.java.com.tetris;
+package com.tetris;
 
-import main.java.com.tetris.ui.MainWindow;
+import com.tetris.ui.MainWindow;
 import javax.swing.SwingUtilities;
 
 /**
