@@ -5,6 +5,7 @@ import java.util.Random;
 
 import javax.swing.Timer;
 
+import com.tetris.effects.AnimationManager;
 import com.tetris.model.Tetromino;
 import com.tetris.util.GameConstants;
 
@@ -30,6 +31,7 @@ public class Game {
     private GameState gameState; // ゲーム状態
     private Timer gameTimer; // ゲームタイマー
     private Random random; // 乱数生成器
+    private AnimationManager animationManager; // アニメーション管理
 
     private int score; // スコア
     private int level; // レベル
@@ -50,6 +52,7 @@ public class Game {
         board = new Board();
         random = new Random();
         gameState = GameState.READY;
+        animationManager = new AnimationManager();
 
         // タイマーの初期化
         gameTimer = new Timer(GameConstants.INITIAL_DELAY, this::gameUpdate);
