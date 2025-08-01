@@ -14,7 +14,7 @@ public class GameConstants {
     public static final int BLOCK_SIZE = 30; // 1ブロックのピクセルサイズ
 
     // ウィンドウ設定
-    public static final int WINDOW_WIDTH = BOARD_WIDTH * BLOCK_SIZE + 200; // サイドパネル用の余白を含む
+    public static final int WINDOW_WIDTH = BOARD_WIDTH * BLOCK_SIZE + 220; // サイドパネル用の余白を含む
     public static final int WINDOW_HEIGHT = BOARD_HEIGHT * BLOCK_SIZE + 50; // 上部余白を含む
 
     // ゲーム速度設定（ミリ秒）
